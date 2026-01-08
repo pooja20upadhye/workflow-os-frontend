@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "name": "Demo Requester",
+    "email": "user@workflowos.com",
+    "password": "password123",
+    "role": "requester",
+    "mobile": "9999999999"
+  },
+  {
+    "id": "2",
+    "name": "Demo Approver",
+    "email": "approver@workflowos.com",
+    "password": "password123",
+    "role": "approver",
+    "mobile": "8888888888"
+  }
+]
