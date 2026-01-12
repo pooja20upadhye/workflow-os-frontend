@@ -37,12 +37,27 @@ export const authService = {
     usersData.push(newUser)
     saveUsers() // persist to localStorage
 
+    // Return user WITHOUT password, but DON'T auto-login
     const { password, ...rest } = newUser
     return rest
   },
 
   getAllUsers: (): AuthUser[] => {
-    // Return all users (without passwords)
     return usersData.map(({ password, ...rest }) => rest)
+  },
+
+  getUsersByRole: (role: string): AuthUser[] => {
+    return usersData
+      .filter(user => user.role === role)
+      .map(({ password, ...rest }) => rest)
+  },
+
+  getCurrentUser: (): AuthUser | null => {
+    const userStr = localStorage.getItem('authUser')
+    return userStr ? JSON.parse(userStr) : null
+  },
+
+  logout: () => {
+    localStorage.removeItem('authUser')
   }
 }

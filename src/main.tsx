@@ -1,11 +1,44 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { RouterProvider } from 'react-router-dom'
-import { router } from '@/app/router'
-import '@/styles/global.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './features/auth/context/auth-context'
+import { LoginPage } from './features/auth/pages/loginPage'
+import { RegisterPage } from './features/auth/pages/registerPage'
+import { DashboardPage } from './features/auth/pages/dashboardPage'
+import { ProtectedRoute } from './components/shared/ProtectedRoute'
+import { Toaster } from 'sonner'
+import './styles/global.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <Toaster position="top-right" richColors />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          {/* Change this: don't redirect to dashboard, redirect to login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
+  )
+}
+
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Root element not found')
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <App />
   </React.StrictMode>
 )

@@ -1,0 +1,43 @@
+import {
+  Eye,
+  EyeOff,
+  Home,
+  FileText,
+  History,
+  Settings,
+  Bell,
+  Search,
+  Plus,
+  Filter,
+  CheckCircle,
+  XCircle,
+  Clock,
+  User,
+  LogOut,
+  ChevronDown,
+  Menu,
+  X,
+  AlertCircle
+} from 'lucide-react'
+
+export const Icons = {
+  eye: Eye,
+  eyeOff: EyeOff,
+  home: Home,
+  fileText: FileText,
+  history: History,
+  settings: Settings,
+  bell: Bell,
+  search: Search,
+  plus: Plus,
+  filter: Filter,
+  checkCircle: CheckCircle,
+  xCircle: XCircle,
+  clock: Clock,
+  user: User,
+  logout: LogOut,
+  chevronDown: ChevronDown,
+  menu: Menu,
+  x: X,
+  alertCircle: AlertCircle
+}

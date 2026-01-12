@@ -14,5 +14,21 @@
     "password": "password123",
     "role": "approver",
     "mobile": "8888888888"
+  },
+  {
+    "id": "3",
+    "name": "Admin User",
+    "email": "admin@workflowos.com",
+    "password": "password123",
+    "role": "admin",
+    "mobile": "7777777777"
+  },
+  {
+    "id": "4",
+    "name": "John Requester",
+    "email": "john@workflowos.com",
+    "password": "password123",
+    "role": "requester",
+    "mobile": "6666666666"
   }
 ]
