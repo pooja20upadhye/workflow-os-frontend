@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { AuthUser } from '../types/authTypes'
+import { AuthUser, RegisterPayload } from '../types/authTypes'
 import { authService } from '../services/authService'
 
 interface AuthContextType {
@@ -7,7 +7,7 @@ interface AuthContextType {
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => void
-  register: (data: any) => Promise<void> // Should return Promise<void>
+  register: (data: RegisterPayload) => Promise<void>
   isAuthenticated: boolean
 }
 
@@ -31,14 +31,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Check for existing session on mount
-    const storedUser = localStorage.getItem('authUser')
+    const storedUser = authService.getCurrentUser()
     if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (error) {
-        console.error('Error parsing stored user:', error)
-        localStorage.removeItem('authUser')
-      }
+      setUser(storedUser)
     }
     setIsLoading(false)
   }, [])
@@ -58,18 +53,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('authUser')
-    localStorage.removeItem('rememberedEmail')
-    localStorage.removeItem('rememberedPassword')
+    authService.logout()
   }
 
-  const register = async (data: any): Promise<void> => {
+  const register = async (data: RegisterPayload): Promise<void> => {
     setIsLoading(true)
     try {
-      // Just call authService.register but don't use the return value
       await authService.register(data)
-      // Don't auto-login after registration
-      // Don't set user state
     } catch (error) {
       throw error
     } finally {
@@ -85,7 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         logout,
         register,
-        isAuthenticated: !!user && !isLoading
+        isAuthenticated: !!user
       }}
     >
       {children}

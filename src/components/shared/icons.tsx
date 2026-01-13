@@ -17,7 +17,10 @@ import {
   ChevronDown,
   Menu,
   X,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Trash,
+  Check
 } from 'lucide-react'
 
 export const Icons = {
@@ -39,5 +42,8 @@ export const Icons = {
   chevronDown: ChevronDown,
   menu: Menu,
   x: X,
-  alertCircle: AlertCircle
+  alertCircle: AlertCircle,
+  edit: Edit,
+  trash: Trash,
+  check: Check
 }

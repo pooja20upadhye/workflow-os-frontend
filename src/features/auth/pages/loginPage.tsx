@@ -9,7 +9,7 @@ import { Icons } from '@/components/shared/icons'
 
 export const LoginPage = () => {
   const navigate = useNavigate()
-  const { login, isLoading, user } = useAuth() // Use user instead of isAuthenticated
+  const { login, isLoading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -17,16 +17,6 @@ export const LoginPage = () => {
     rememberMe: false
   })
   const [error, setError] = useState('')
-
-  // Simple check - if user exists, they're logged in
-  const isAuthenticated = !!user
-
-  // Only redirect on mount if already authenticated
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate('/dashboard')
-    }
-  }, []) // Empty dependency array - only run once on mount
 
   // Load remembered credentials
   useEffect(() => {
