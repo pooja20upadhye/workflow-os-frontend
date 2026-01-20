@@ -20,7 +20,10 @@ import {
   AlertCircle,
   Edit,
   Trash,
-  Check
+  Check,
+  Workflow,
+  Upload,
+  Inbox
 } from 'lucide-react'
 
 export const Icons = {
@@ -45,5 +48,10 @@ export const Icons = {
   alertCircle: AlertCircle,
   edit: Edit,
   trash: Trash,
-  check: Check
+  check: Check,
+  workflow: Workflow,
+  upload: Upload,
+  inbox: Inbox
+  
+
 }
