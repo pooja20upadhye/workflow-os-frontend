@@ -115,9 +115,9 @@ export const RequesterDashboard = () => {
     return `${name}: ${value} (${percentValue}%)`
   }
 
-  // Tooltip formatter with proper type (fixes the error)
-  const tooltipFormatter = (value: number | string, name: string) => {
-    return [`${value} requests`, name]
+  // Fixed tooltip formatter – name is optional (Recharts may pass undefined)
+  const tooltipFormatter = (value: any, name?: string) => {
+    return [`${value} requests`, name ?? 'Value']
   }
 
   return (
@@ -125,10 +125,17 @@ export const RequesterDashboard = () => {
       {/* Header + CTA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">Requester Dashboard</h1>
-         
+          <h1 className="text-3xl font-bold tracking-tight">Requester Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Overview of your workflow activity
+          </p>
         </div>
-      
+        <Button asChild className="gap-2">
+          <Link to="/requests">
+            <Icons.plus className="h-4 w-4" />
+            New Request
+          </Link>
+        </Button>
       </div>
 
       {/* Stats Cards */}
