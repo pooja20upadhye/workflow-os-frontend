@@ -125,17 +125,10 @@ export const RequesterDashboard = () => {
       {/* Header + CTA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Requester Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Overview of your workflow activity
-          </p>
+          <h1 className="text-2xl font-medium tracking-tight">Requester Dashboard</h1>
+         
         </div>
-        <Button asChild className="gap-2">
-          <Link to="/requests">
-            <Icons.plus className="h-4 w-4" />
-            New Request
-          </Link>
-        </Button>
+       
       </div>
 
       {/* Stats Cards */}
