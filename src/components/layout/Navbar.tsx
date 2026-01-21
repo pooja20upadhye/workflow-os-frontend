@@ -1,3 +1,4 @@
+// src/components/layout/Navbar.tsx
 import { useAuth } from '@/features/auth/context/auth-context'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -30,7 +31,7 @@ export const Navbar = () => {
   return (
     <header className="sticky top-0 z-30 border-b bg-card">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
-        {/* Mobile menu button + Logo */}
+        {/* Mobile: Hamburger + simple logo (no black box) */}
         <div className="flex items-center gap-4 lg:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -49,20 +50,22 @@ export const Navbar = () => {
           </Link>
         </div>
 
-        {/* Desktop logo */}
+        {/* Desktop: Logo with black box + text */}
         <Link
           to="/dashboard"
-          className="hidden items-center gap-2 font-semibold text-lg lg:flex"
+          className="hidden items-center gap-3 font-semibold text-lg lg:flex"
         >
-          <Icons.workflow className="h-6 w-6 text-primary" />
-          WorkflowOS
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+            <Icons.workflow className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <span>WorkflowOS</span>
         </Link>
 
         <div className="flex items-center gap-4">
           {/* Notification bell */}
           <Button variant="ghost" size="icon" className="relative">
             <Icons.bell className="h-5 w-5" />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
+            {/* Uncomment for red dot: <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" /> */}
           </Button>
 
           {/* User menu */}
@@ -79,15 +82,14 @@ export const Navbar = () => {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col gap-0.5">
-                  <p className="font-medium">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
-                  <p className="text-xs capitalize text-muted-foreground">{user?.role}</p>
+                  <p className="font-medium">{user?.name || 'User'}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email || '—'}</p>
+                  <p className="text-xs capitalize text-muted-foreground">
+                    {user?.role || 'requester'}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/profile">Profile</Link>
-              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/settings">Settings</Link>
               </DropdownMenuItem>

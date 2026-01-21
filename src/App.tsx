@@ -1,19 +1,26 @@
 // src/App.tsx
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './features/auth/context/auth-context'
-import { Toaster } from 'sonner'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { AuthProvider } from "./features/auth/context/auth-context";
+import { Toaster } from "sonner";
 
 // Public Pages
-import { LoginPage } from './features/auth/pages/loginPage'
-import { RegisterPage } from './features/auth/pages/registerPage'
+import { LoginPage } from "./features/auth/pages/loginPage";
+import { RegisterPage } from "./features/auth/pages/registerPage";
 
 // Protected Pages
-import { DashboardPage } from './features/auth/pages/dashboardPage'
+import { DashboardPage } from "./features/auth/pages/dashboardPage";
 
 // Layout & Protection
-import { AppLayout } from './components/layout/AppLayout'
-import { ProtectedRoute } from './components/shared/ProtectedRoute'
-import RequesterRequestsPage from './features/workflow/pages/RequesterRequestsPage'
+import { AppLayout } from "./components/layout/AppLayout";
+import { ProtectedRoute } from "./components/shared/ProtectedRoute";
+import RequesterRequestsPage from "./features/workflow/pages/RequesterRequestsPage";
+import RequesterHistoryPage from "./features/workflow/pages/RequesterHistoryPage";
+import RequesterSettingsPage from "./features/workflow/pages/RequesterSettingsPage";
 
 export default function App() {
   return (
@@ -27,9 +34,17 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
 
           {/* Protected Routes with Shared Layout */}
-          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route path="/dashboard" element={<DashboardPage />} />
-           <Route path="/requests" element={<RequesterRequestsPage />} />
+            <Route path="/requests" element={<RequesterRequestsPage />} />
+            <Route path="/history" element={<RequesterHistoryPage />} />
+            <Route path="/settings" element={<RequesterSettingsPage />} />
             {/* Add more later */}
           </Route>
 
@@ -39,5 +54,5 @@ export default function App() {
         </Routes>
       </AuthProvider>
     </Router>
-  )
+  );
 }

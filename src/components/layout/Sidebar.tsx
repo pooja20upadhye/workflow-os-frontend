@@ -1,3 +1,4 @@
+// src/components/layout/Sidebar.tsx
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Icons } from '@/components/shared/icons'
@@ -12,28 +13,20 @@ export const Sidebar = ({ mobile = false }: SidebarProps) => {
 
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: Icons.home },
-    { to: '/requests', label: 'Requests', icon: Icons.fileText },
-    { to: '/history', label: 'History', icon: Icons.history, disabled: true },
-    { to: '/settings', label: 'Settings', icon: Icons.settings, disabled: true },
+    { to: '/requests',  label: 'Requests',  icon: Icons.fileText },
+    { to: '/history',   label: 'History',   icon: Icons.history },
+    { to: '/settings',  label: 'Settings',  icon: Icons.settings },
   ]
 
-  // You can add role-based items later
-  // if (user?.role === 'admin') { ... }
-
   return (
-    <div className={cn('flex h-full flex-col bg-card', mobile ? 'p-4' : 'p-6')}>
-      {/* Logo / Brand */}
-      {!mobile && (
-        <div className="mb-10 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Icons.workflow className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold">WorkflowOS</span>
-        </div>
-      )}
+    <div className={cn(
+      'flex h-full flex-col bg-card',
+      mobile ? 'p-4' : 'p-4' // reduced from p-6 → p-4 for tighter look
+    )}>
+      {/* No logo here anymore – moved to Navbar */}
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1">
+      {/* Navigation – tighter spacing */}
+      <nav className="flex-1 space-y-0.5 mt-2"> {/* reduced space-y-1 → space-y-0.5 */}
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -41,11 +34,10 @@ export const Sidebar = ({ mobile = false }: SidebarProps) => {
             end={item.to === '/dashboard'}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActive
                   ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground',
-                item.disabled && 'pointer-events-none opacity-50'
+                  : 'text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground'
               )
             }
           >
@@ -55,15 +47,19 @@ export const Sidebar = ({ mobile = false }: SidebarProps) => {
         ))}
       </nav>
 
-      {/* User info at bottom */}
-      <div className="mt-auto border-t pt-6">
+      {/* User info at bottom – slightly reduced padding */}
+      <div className="mt-auto border-t pt-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
             <Icons.user className="h-5 w-5 text-primary" />
           </div>
           <div className="min-w-0">
-            <p className="truncate font-medium">{user?.name}</p>
-            <p className="truncate text-xs text-muted-foreground capitalize">{user?.role}</p>
+            <p className="truncate font-medium text-sm">
+              {user?.name || 'Pooja Prasad Upadhye'}
+            </p>
+            <p className="truncate text-xs text-muted-foreground capitalize">
+              {user?.role || 'Requester'}
+            </p>
           </div>
         </div>
       </div>

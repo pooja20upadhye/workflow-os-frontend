@@ -1,84 +1,47 @@
-import { Workflow, CreateWorkflowRequest, UpdateWorkflowRequest, WorkflowStatus } from '../types/workflowTypes'
+// src/features/workflow/services/workflowService.ts
+import { Workflow, CreateWorkflowRequest, UpdateWorkflowRequest } from '../types/workflowTypes';
+import { getInitialWorkflows } from '../components/requester/mock/mockData';
 
-// Mock data for workflows
-const mockWorkflows: Workflow[] = [
-  {
-    id: '1',
-    title: 'Software License Request',
-    description: 'Request for Adobe Creative Cloud license',
-    category: 'Software',
-    status: 'approved',
-    priority: 'high',
-    requesterId: '1',
-    requesterName: 'Demo Requester',
-    approverId: '2',
-    approverName: 'Demo Approver',
-    createdAt: '2024-01-10',
-    updatedAt: '2024-01-11',
-    dueDate: '2024-01-20'
-  },
-  {
-    id: '2',
-    title: 'Hardware Purchase',
-    description: 'Need new laptop for development team',
-    category: 'Hardware',
-    status: 'pending',
-    priority: 'medium',
-    requesterId: '1',
-    requesterName: 'Demo Requester',
-    createdAt: '2024-01-12',
-    updatedAt: '2024-01-12',
-    dueDate: '2024-01-25'
-  },
-  {
-    id: '3',
-    title: 'Travel Request',
-    description: 'Conference attendance in San Francisco',
-    category: 'Travel',
-    status: 'rejected',
-    priority: 'high',
-    requesterId: '4',
-    requesterName: 'John Requester',
-    approverId: '2',
-    approverName: 'Demo Approver',
-    createdAt: '2024-01-08',
-    updatedAt: '2024-01-09',
-    dueDate: '2024-02-01'
-  }
-]
+// Load workflows once (from localStorage or mock)
+let workflows: Workflow[] = getInitialWorkflows();
 
-// Helper to save to localStorage
+// Save current state to localStorage
 const saveWorkflows = () => {
-  localStorage.setItem('workflows', JSON.stringify(mockWorkflows))
-}
-
-// Load from localStorage or use mock data
-const savedWorkflows = localStorage.getItem('workflows')
-let workflows: Workflow[] = savedWorkflows ? JSON.parse(savedWorkflows) : [...mockWorkflows]
+  localStorage.setItem('workflows', JSON.stringify(workflows));
+};
 
 export const workflowService = {
-  // CRUD Operations
-  getAllWorkflows: (): Workflow[] => {
-    return workflows
+  // ────────────────────────────────────────────────
+  // Read operations
+  // ────────────────────────────────────────────────
+  getAllWorkflows(): Workflow[] {
+    return workflows;
   },
 
-  getWorkflowById: (id: string): Workflow | undefined => {
-    return workflows.find(w => w.id === id)
+  getWorkflowById(id: string): Workflow | undefined {
+    return workflows.find((w) => w.id === id);
   },
 
-  getWorkflowsByRequester: (requesterId: string): Workflow[] => {
-    return workflows.filter(w => w.requesterId === requesterId)
+  getWorkflowsByRequester(requesterId: string): Workflow[] {
+    return workflows.filter((w) => w.requesterId === requesterId);
   },
 
-  getWorkflowsByApprover: (approverId: string): Workflow[] => {
-    return workflows.filter(w => w.approverId === approverId)
+  getWorkflowsByApprover(approverId: string): Workflow[] {
+    return workflows.filter((w) => w.approverId === approverId);
   },
 
-  getPendingApprovals: (): Workflow[] => {
-    return workflows.filter(w => w.status === 'pending' || w.status === 'submitted')
+  getPendingApprovals(): Workflow[] {
+    return workflows.filter((w) => w.status === 'pending' || w.status === 'submitted');
   },
 
-  createWorkflow: (data: CreateWorkflowRequest, requesterId: string, requesterName: string): Workflow => {
+  // ────────────────────────────────────────────────
+  // Write operations (all call saveWorkflows)
+  // ────────────────────────────────────────────────
+  createWorkflow(
+    data: CreateWorkflowRequest,
+    requesterId: string,
+    requesterName: string
+  ): Workflow {
     const newWorkflow: Workflow = {
       id: crypto.randomUUID(),
       ...data,
@@ -86,83 +49,93 @@ export const workflowService = {
       requesterId,
       requesterName,
       createdAt: new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0]
-    }
-    
-    workflows.push(newWorkflow)
-    saveWorkflows()
-    return newWorkflow
+      updatedAt: new Date().toISOString().split('T')[0],
+    };
+
+    workflows.push(newWorkflow);
+    saveWorkflows();
+    return newWorkflow;
   },
 
-  updateWorkflow: (id: string, data: UpdateWorkflowRequest): Workflow | undefined => {
-    const index = workflows.findIndex(w => w.id === id)
-    if (index === -1) return undefined
+  updateWorkflow(id: string, data: UpdateWorkflowRequest): Workflow | undefined {
+    const index = workflows.findIndex((w) => w.id === id);
+    if (index === -1) return undefined;
 
     workflows[index] = {
       ...workflows[index],
       ...data,
-      updatedAt: new Date().toISOString().split('T')[0]
-    }
-    
-    saveWorkflows()
-    return workflows[index]
+      updatedAt: new Date().toISOString().split('T')[0],
+    };
+
+    saveWorkflows();
+    return workflows[index];
   },
 
-  deleteWorkflow: (id: string): boolean => {
-    const initialLength = workflows.length
-    workflows = workflows.filter(w => w.id !== id)
-    saveWorkflows()
-    return workflows.length < initialLength
+  deleteWorkflow(id: string): boolean {
+    const before = workflows.length;
+    workflows = workflows.filter((w) => w.id !== id);
+    saveWorkflows();
+    return workflows.length < before;
   },
 
-  // Workflow Actions
-  submitWorkflow: (id: string): Workflow | undefined => {
-    return workflowService.updateWorkflow(id, { status: 'submitted' })
+  submitWorkflow(id: string): Workflow | undefined {
+    return this.updateWorkflow(id, { status: 'submitted' });
   },
 
-  approveWorkflow: (id: string, approverId: string, approverName: string): Workflow | undefined => {
-    const workflow = workflows.find(w => w.id === id)
-    if (!workflow) return undefined
+  approveWorkflow(
+    id: string,
+    approverId: string,
+    approverName: string
+  ): Workflow | undefined {
+    const wf = workflows.find((w) => w.id === id);
+    if (!wf) return undefined;
 
-    workflow.status = 'approved'
-    workflow.approverId = approverId
-    workflow.approverName = approverName
-    workflow.updatedAt = new Date().toISOString().split('T')[0]
-    
-    saveWorkflows()
-    return workflow
+    wf.status = 'approved';
+    wf.approverId = approverId;
+    wf.approverName = approverName;
+    wf.updatedAt = new Date().toISOString().split('T')[0];
+
+    saveWorkflows();
+    return wf;
   },
 
-  rejectWorkflow: (id: string, approverId: string, approverName: string): Workflow | undefined => {
-    const workflow = workflows.find(w => w.id === id)
-    if (!workflow) return undefined
+  rejectWorkflow(
+    id: string,
+    approverId: string,
+    approverName: string
+  ): Workflow | undefined {
+    const wf = workflows.find((w) => w.id === id);
+    if (!wf) return undefined;
 
-    workflow.status = 'rejected'
-    workflow.approverId = approverId
-    workflow.approverName = approverName
-    workflow.updatedAt = new Date().toISOString().split('T')[0]
-    
-    saveWorkflows()
-    return workflow
+    wf.status = 'rejected';
+    wf.approverId = approverId;
+    wf.approverName = approverName;
+    wf.updatedAt = new Date().toISOString().split('T')[0];
+
+    saveWorkflows();
+    return wf;
   },
 
+  // ────────────────────────────────────────────────
   // Statistics
-  getStatistics: (userId?: string) => {
-    let filteredWorkflows = workflows
+  // ────────────────────────────────────────────────
+  getStatistics(userId?: string) {
+    let filtered = workflows;
+
     if (userId) {
-      filteredWorkflows = workflows.filter(w => 
-        w.requesterId === userId || w.approverId === userId
-      )
+      filtered = workflows.filter(
+        (w) => w.requesterId === userId || w.approverId === userId
+      );
     }
 
     return {
-      total: filteredWorkflows.length,
-      draft: filteredWorkflows.filter(w => w.status === 'draft').length,
-      submitted: filteredWorkflows.filter(w => w.status === 'submitted').length,
-      pending: filteredWorkflows.filter(w => w.status === 'pending').length,
-      approved: filteredWorkflows.filter(w => w.status === 'approved').length,
-      rejected: filteredWorkflows.filter(w => w.status === 'rejected').length,
-      completed: filteredWorkflows.filter(w => w.status === 'completed').length
-    }
-  }
-}
+      total: filtered.length,
+      draft: filtered.filter((w) => w.status === 'draft').length,
+      submitted: filtered.filter((w) => w.status === 'submitted').length,
+      pending: filtered.filter((w) => w.status === 'pending').length,
+      approved: filtered.filter((w) => w.status === 'approved').length,
+      rejected: filtered.filter((w) => w.status === 'rejected').length,
+      completed: filtered.filter((w) => w.status === 'completed').length,
+    };
+  },
+};
