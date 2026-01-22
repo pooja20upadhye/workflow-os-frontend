@@ -14,16 +14,13 @@ export default function RequesterHistoryPage() {
     if (!user?.id) return
     const myWorkflows = workflowService.getWorkflowsByRequester(user.id)
     const past = myWorkflows.filter(w =>
-      w.status === 'approved' ||
-      w.status === 'rejected' ||
-      w.status === 'completed'
+      w.status === 'approved' || w.status === 'rejected' || w.status === 'completed'
     )
     setHistory(past)
   }, [user?.id])
 
   return (
     <div className="p-6 lg:p-8">
-      {/* Header - same style as Requests page */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">My Request History</h1>
         <p className="text-muted-foreground mt-1">
@@ -31,7 +28,6 @@ export default function RequesterHistoryPage() {
         </p>
       </div>
 
-      {/* Main content card - same structure */}
       <Card>
         <CardHeader>
           <CardTitle>Completed Requests</CardTitle>
@@ -39,9 +35,9 @@ export default function RequesterHistoryPage() {
         <CardContent>
           <RequesterWorkflowTable
             workflows={history}
-            onEdit={() => {}}     // disabled in history
-            onDelete={() => {}}   // disabled
-            onSubmit={() => {}}   // disabled
+            onEdit={() => {}}     
+            onDelete={() => {}}   
+            onSubmit={() => {}}   
           />
         </CardContent>
       </Card>

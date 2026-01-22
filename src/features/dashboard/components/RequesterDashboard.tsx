@@ -24,7 +24,17 @@ import {
 } from 'recharts'
 import { toast } from 'sonner'
 
-const COLORS = ['#22c55e', '#eab308', '#ef4444', '#3b82f6', '#a855f7', '#6b7280']
+const PASTEL_COLORS = {
+  approved: '#86efac',    // pastel green
+  pending: '#fde68a',     // pastel yellow
+  rejected: '#fca5a5',    // pastel red
+  draft: '#d1d5db',       // pastel gray
+  submitted: '#93c5fd',   // pastel blue
+  low: '#bbf7d0',
+  medium: '#fed7aa',
+  high: '#fecaca',
+  critical: '#fca5a5',
+}
 
 export const RequesterDashboard = () => {
   const { user } = useAuth()
@@ -39,7 +49,7 @@ export const RequesterDashboard = () => {
   })
   const [statusData, setStatusData] = useState<Array<{ name: string; value: number; color: string }>>([])
   const [timeData, setTimeData] = useState<Array<{ month: string; count: number }>>([])
-  const [priorityData, setPriorityData] = useState<Array<{ name: string; value: number }>>([])
+  const [priorityData, setPriorityData] = useState<Array<{ name: string; value: number; color: string }>>([])
 
   useEffect(() => {
     if (user?.id) loadData()
@@ -65,18 +75,18 @@ export const RequesterDashboard = () => {
       submitted: statistics.submitted,
     })
 
-    // Status pie data
+    // Status pie data with pastel colors
     const pieData = [
-      { name: 'Approved', value: statistics.approved, color: '#22c55e' },
-      { name: 'Pending', value: statistics.pending, color: '#eab308' },
-      { name: 'Rejected', value: statistics.rejected, color: '#ef4444' },
-      { name: 'Draft', value: statistics.draft, color: '#6b7280' },
-      { name: 'Submitted', value: statistics.submitted, color: '#3b82f6' },
+      { name: 'Approved', value: statistics.approved, color: PASTEL_COLORS.approved },
+      { name: 'Pending', value: statistics.pending, color: PASTEL_COLORS.pending },
+      { name: 'Rejected', value: statistics.rejected, color: PASTEL_COLORS.rejected },
+      { name: 'Draft', value: statistics.draft, color: PASTEL_COLORS.draft },
+      { name: 'Submitted', value: statistics.submitted, color: PASTEL_COLORS.submitted },
     ].filter(item => item.value > 0)
 
     setStatusData(pieData)
 
-    // Requests over time (monthly grouping)
+    // Requests over time
     const monthly = all.reduce((acc: Record<string, number>, wf) => {
       const date = new Date(wf.createdAt)
       const month = date.toLocaleString('default', { month: 'short', year: '2-digit' })
@@ -85,17 +95,17 @@ export const RequesterDashboard = () => {
     }, {})
     setTimeData(Object.entries(monthly).map(([month, count]) => ({ month, count })))
 
-    // Priority breakdown
+    // Priority breakdown with pastel colors
     const prioCount = all.reduce((acc: Record<string, number>, wf) => {
       acc[wf.priority] = (acc[wf.priority] || 0) + 1
       return acc
     }, {})
     setPriorityData([
-      { name: 'Low', value: prioCount.low || 0 },
-      { name: 'Medium', value: prioCount.medium || 0 },
-      { name: 'High', value: prioCount.high || 0 },
-      { name: 'Critical', value: prioCount.critical || 0 },
-    ])
+      { name: 'Low', value: prioCount.low || 0, color: PASTEL_COLORS.low },
+      { name: 'Medium', value: prioCount.medium || 0, color: PASTEL_COLORS.medium },
+      { name: 'High', value: prioCount.high || 0, color: PASTEL_COLORS.high },
+      { name: 'Critical', value: prioCount.critical || 0, color: PASTEL_COLORS.critical },
+    ].filter(item => item.value > 0))
   }
 
   const getStatusColor = (status: string) => {
@@ -115,27 +125,30 @@ export const RequesterDashboard = () => {
     return `${name}: ${value} (${percentValue}%)`
   }
 
-  // Fixed tooltip formatter – name is optional (Recharts may pass undefined)
   const tooltipFormatter = (value: any, name?: string) => {
     return [`${value} requests`, name ?? 'Value']
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header + CTA */}
+    <div className="space-y-8 p-6 lg:p-8">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">Requester Dashboard</h1>
-         
+          <h1 className="text-3xl font-bold tracking-tight">Requester Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Here's what's happening with your workflow requests today.
+          </p>
         </div>
-       
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Stats Cards with icons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+            <div className="rounded-lg bg-muted/50 p-2 border border-border">
+              <Icons.fileText className="h-5 w-5 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.total}</div>
@@ -143,8 +156,11 @@ export const RequesterDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <div className="rounded-lg bg-muted/50 p-2 border border-border">
+              <Icons.clock className="h-5 w-5 text-yellow-600" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-yellow-600">{stats.pending}</div>
@@ -152,8 +168,11 @@ export const RequesterDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Approved</CardTitle>
+            <div className="rounded-lg bg-muted/50 p-2 border border-border">
+              <Icons.checkCircle className="h-5 w-5 text-green-600" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">{stats.approved}</div>
@@ -161,8 +180,11 @@ export const RequesterDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+            <div className="rounded-lg bg-muted/50 p-2 border border-border">
+              <Icons.xCircle className="h-5 w-5 text-red-600" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-red-600">{stats.rejected}</div>
@@ -170,7 +192,7 @@ export const RequesterDashboard = () => {
         </Card>
       </div>
 
-      {/* Charts - Status Pie + Time Line */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Status Distribution */}
         <Card>
@@ -187,7 +209,7 @@ export const RequesterDashboard = () => {
                     cy="50%"
                     innerRadius={60}
                     outerRadius={100}
-                    paddingAngle={3}
+                    paddingAngle={4}
                     dataKey="value"
                     label={renderCustomizedLabel}
                     labelLine={true}
@@ -207,7 +229,7 @@ export const RequesterDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Requests Over Time */}
+        {/* Requests Trend */}
         <Card>
           <CardHeader>
             <CardTitle>Requests Trend</CardTitle>
@@ -216,11 +238,17 @@ export const RequesterDashboard = () => {
             {timeData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={timeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" stroke="#6b7280" />
+                  <YAxis allowDecimals={false} stroke="#6b7280" />
                   <Tooltip formatter={tooltipFormatter} />
-                  <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#60a5fa"
+                    strokeWidth={2}
+                    dot={{ r: 4, fill: '#60a5fa', stroke: '#fff', strokeWidth: 2 }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -241,11 +269,15 @@ export const RequesterDashboard = () => {
           {priorityData.some(p => p.value > 0) ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={priorityData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="name" stroke="#6b7280" />
+                <YAxis allowDecimals={false} stroke="#6b7280" />
                 <Tooltip formatter={tooltipFormatter} />
-                <Bar dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {priorityData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : (

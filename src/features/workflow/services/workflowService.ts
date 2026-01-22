@@ -1,5 +1,5 @@
 // src/features/workflow/services/workflowService.ts
-import { Workflow, CreateWorkflowRequest, UpdateWorkflowRequest } from '../types/workflowTypes';
+import { Workflow, CreateWorkflowRequest, UpdateWorkflowRequest, WorkflowStatus, WorkflowAction } from '../types/workflowTypes';
 import { getInitialWorkflows } from '../components/requester/mock/mockData';
 
 // Load workflows once (from localStorage or mock)
@@ -11,9 +11,7 @@ const saveWorkflows = () => {
 };
 
 export const workflowService = {
-  // ────────────────────────────────────────────────
   // Read operations
-  // ────────────────────────────────────────────────
   getAllWorkflows(): Workflow[] {
     return workflows;
   },
@@ -34,9 +32,7 @@ export const workflowService = {
     return workflows.filter((w) => w.status === 'pending' || w.status === 'submitted');
   },
 
-  // ────────────────────────────────────────────────
-  // Write operations (all call saveWorkflows)
-  // ────────────────────────────────────────────────
+  // Write operations
   createWorkflow(
     data: CreateWorkflowRequest,
     requesterId: string,
@@ -50,6 +46,7 @@ export const workflowService = {
       requesterName,
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
+      actions: [] // Initialized
     };
 
     workflows.push(newWorkflow);
@@ -72,70 +69,74 @@ export const workflowService = {
   },
 
   deleteWorkflow(id: string): boolean {
-    const before = workflows.length;
-    workflows = workflows.filter((w) => w.id !== id);
-    saveWorkflows();
-    return workflows.length < before;
+    const initialLength = workflows.length
+    workflows = workflows.filter(w => w.id !== id)
+    saveWorkflows()
+    return workflows.length < initialLength
   },
 
   submitWorkflow(id: string): Workflow | undefined {
-    return this.updateWorkflow(id, { status: 'submitted' });
+    return workflowService.updateWorkflow(id, { status: 'submitted' })
   },
 
-  approveWorkflow(
-    id: string,
-    approverId: string,
-    approverName: string
-  ): Workflow | undefined {
-    const wf = workflows.find((w) => w.id === id);
-    if (!wf) return undefined;
+  approveWorkflow(id: string, approverId: string, approverName: string): Workflow | undefined {
+    const workflow = workflows.find(w => w.id === id)
+    if (!workflow) return undefined
 
-    wf.status = 'approved';
-    wf.approverId = approverId;
-    wf.approverName = approverName;
-    wf.updatedAt = new Date().toISOString().split('T')[0];
-
-    saveWorkflows();
-    return wf;
+    workflow.status = 'approved'
+    workflow.approverId = approverId
+    workflow.approverName = approverName
+    workflow.updatedAt = new Date().toISOString().split('T')[0]
+    workflow.actions = workflow.actions || []
+    workflow.actions.push({
+      action: 'approved',
+      actorId: approverId,
+      actorName: approverName,
+      timestamp: new Date().toISOString(),
+    })
+    
+    saveWorkflows()
+    return workflow
   },
 
-  rejectWorkflow(
-    id: string,
-    approverId: string,
-    approverName: string
-  ): Workflow | undefined {
-    const wf = workflows.find((w) => w.id === id);
-    if (!wf) return undefined;
+  rejectWorkflow(id: string, approverId: string, approverName: string, comment?: string): Workflow | undefined {
+    const workflow = workflows.find(w => w.id === id)
+    if (!workflow) return undefined
 
-    wf.status = 'rejected';
-    wf.approverId = approverId;
-    wf.approverName = approverName;
-    wf.updatedAt = new Date().toISOString().split('T')[0];
-
-    saveWorkflows();
-    return wf;
+    workflow.status = 'rejected'
+    workflow.approverId = approverId
+    workflow.approverName = approverName
+    workflow.updatedAt = new Date().toISOString().split('T')[0]
+    workflow.actions = workflow.actions || []
+    workflow.actions.push({
+      action: 'rejected',
+      actorId: approverId,
+      actorName: approverName,
+      timestamp: new Date().toISOString(),
+      comment: comment || 'No comment provided'
+    })
+    
+    saveWorkflows()
+    return workflow
   },
 
-  // ────────────────────────────────────────────────
   // Statistics
-  // ────────────────────────────────────────────────
-  getStatistics(userId?: string) {
-    let filtered = workflows;
-
+  getStatistics: (userId?: string) => {
+    let filteredWorkflows = workflows
     if (userId) {
-      filtered = workflows.filter(
-        (w) => w.requesterId === userId || w.approverId === userId
-      );
+      filteredWorkflows = workflows.filter(w => 
+        w.requesterId === userId || w.approverId === userId
+      )
     }
 
     return {
-      total: filtered.length,
-      draft: filtered.filter((w) => w.status === 'draft').length,
-      submitted: filtered.filter((w) => w.status === 'submitted').length,
-      pending: filtered.filter((w) => w.status === 'pending').length,
-      approved: filtered.filter((w) => w.status === 'approved').length,
-      rejected: filtered.filter((w) => w.status === 'rejected').length,
-      completed: filtered.filter((w) => w.status === 'completed').length,
-    };
-  },
-};
+      total: filteredWorkflows.length,
+      draft: filteredWorkflows.filter(w => w.status === 'draft').length,
+      submitted: filteredWorkflows.filter(w => w.status === 'submitted').length,
+      pending: filteredWorkflows.filter(w => w.status === 'pending').length,
+      approved: filteredWorkflows.filter(w => w.status === 'approved').length,
+      rejected: filteredWorkflows.filter(w => w.status === 'rejected').length,
+      completed: filteredWorkflows.filter(w => w.status === 'completed').length
+    }
+  }
+}

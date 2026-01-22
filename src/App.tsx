@@ -21,6 +21,8 @@ import { ProtectedRoute } from "./components/shared/ProtectedRoute";
 import RequesterRequestsPage from "./features/workflow/pages/RequesterRequestsPage";
 import RequesterHistoryPage from "./features/workflow/pages/RequesterHistoryPage";
 import RequesterSettingsPage from "./features/workflow/pages/RequesterSettingsPage";
+import ApproverApprovalsPage from "./features/workflow/pages/ApproverApprovalsPage";
+import ApproverHistoryPage from "./features/workflow/pages/ApproverHistoryPage";
 
 export default function App() {
   return (
@@ -45,7 +47,8 @@ export default function App() {
             <Route path="/requests" element={<RequesterRequestsPage />} />
             <Route path="/history" element={<RequesterHistoryPage />} />
             <Route path="/settings" element={<RequesterSettingsPage />} />
-            {/* Add more later */}
+            <Route path="/approvals" element={<ApproverApprovalsPage />} />
+            <Route path="/history" element={<ApproverHistoryPage />} />
           </Route>
 
           {/* Redirects */}

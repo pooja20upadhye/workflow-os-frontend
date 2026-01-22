@@ -1,5 +1,14 @@
+// src/features/workflow/types/workflowTypes.ts
 export type WorkflowStatus = 'draft' | 'submitted' | 'pending' | 'approved' | 'rejected' | 'completed'
 export type WorkflowPriority = 'low' | 'medium' | 'high' | 'critical'
+
+export interface WorkflowAction {
+  action: 'submitted' | 'approved' | 'rejected'
+  actorId: string
+  actorName: string
+  timestamp: string
+  comment?: string
+}
 
 export interface Workflow {
   id: string
@@ -15,6 +24,7 @@ export interface Workflow {
   createdAt: string
   updatedAt: string
   dueDate?: string
+  actions?: WorkflowAction[]  // Added for history
 }
 
 export interface CreateWorkflowRequest {

@@ -1,20 +1,47 @@
-import { Button } from '@/components/ui/button'
+// src/features/dashboard/components/ApproverDashboard.tsx
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Icons } from '@/components/shared/icons'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Link } from 'react-router-dom'
+import { workflowService } from '@/features/workflow/services/workflowService'
+import { Workflow } from '@/features/workflow/types/workflowTypes'
+import { useAuth } from '@/features/auth/context/auth-context'
 
 export const ApproverDashboard = () => {
-  const pendingApprovals = [
-    { id: 1, title: 'Software License', requester: 'John Doe', date: '2024-01-15', priority: 'High' },
-    { id: 2, title: 'Hardware Purchase', requester: 'Jane Smith', date: '2024-01-14', priority: 'Medium' },
-    { id: 3, title: 'Travel Request', requester: 'Bob Johnson', date: '2024-01-13', priority: 'Low' },
-  ]
+  const { user } = useAuth()
+  const [pendingApprovals, setPendingApprovals] = useState<Workflow[]>([])
+  const [approvedToday, setApprovedToday] = useState(0)
+  const [rejectedToday, setRejectedToday] = useState(0)
+
+  useEffect(() => {
+    if (user?.role !== 'approver') return
+
+    const pending = workflowService.getPendingApprovals()
+    setPendingApprovals(pending)
+
+    const history = workflowService.getWorkflowsByApprover(user.id)
+    const today = new Date().toISOString().split('T')[0]
+    setApprovedToday(history.filter(w => w.status === 'approved' && w.updatedAt === today).length)
+    setRejectedToday(history.filter(w => w.status === 'rejected' && w.updatedAt === today).length)
+  }, [user])
+
+  const handleApprove = (id: string) => {
+    workflowService.approveWorkflow(id, user?.id || '', user?.name || 'Approver')
+  }
+
+  const handleRejectOpen = (approval: Workflow) => {
+    // Implement reject logic here, e.g. open dialog
+    console.log('Reject', approval)
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Approver Dashboard</h2>
         <Button variant="outline" className="gap-2">
-          <Icons.filter size={16} />
+          <Icons.filter className="h-4 w-4" />
           Filter
         </Button>
       </div>
@@ -26,7 +53,7 @@ export const ApproverDashboard = () => {
             <Icons.clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-500">12</div>
+            <div className="text-2xl font-bold text-yellow-500">{pendingApprovals.length}</div>
             <p className="text-xs text-muted-foreground">Awaiting your review</p>
           </CardContent>
         </Card>
@@ -37,18 +64,18 @@ export const ApproverDashboard = () => {
             <Icons.checkCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">5</div>
+            <div className="text-2xl font-bold text-green-500">{approvedToday}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Response Time</CardTitle>
-            <Icons.history className="h-4 w-4 text-blue-500" />
+            <CardTitle className="text-sm font-medium">Rejected Today</CardTitle>
+            <Icons.xCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2.4h</div>
-            <p className="text-xs text-muted-foreground">Faster than average</p>
+            <div className="text-2xl font-bold text-red-500">{rejectedToday}</div>
+            <p className="text-xs text-muted-foreground">Rejected requests today</p>
           </CardContent>
         </Card>
       </div>
@@ -67,23 +94,21 @@ export const ApproverDashboard = () => {
                 <div className="flex-1">
                   <h3 className="font-medium">{approval.title}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Requested by {approval.requester} on {approval.date}
+                    Requested by {approval.requesterName} on {approval.createdAt}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    approval.priority === 'High' ? 'bg-red-100 text-red-800' :
-                    approval.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
+                  <Badge variant={approval.priority === 'high' ? 'destructive' : 'secondary'}>
                     {approval.priority}
-                  </span>
+                  </Badge>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="text-green-600 border-green-600">
-                      <Icons.checkCircle size={14} />
+                    <Button size="sm" variant="secondary" onClick={() => handleApprove(approval.id)}>
+                      <Icons.checkCircle className="h-4 w-4 mr-2" />
+                      Approve
                     </Button>
-                    <Button size="sm" variant="outline" className="text-red-600 border-red-600">
-                      <Icons.xCircle size={14} />
+                    <Button size="sm" variant="outline" className="text-red-600 border-red-600" onClick={() => handleRejectOpen(approval)}>
+                      <Icons.xCircle className="h-4 w-4 mr-2" />
+                      Reject
                     </Button>
                   </div>
                 </div>
